@@ -111,13 +111,6 @@ int main(int argc, char* argv[]) {
     prepareEventMap(fin, count);
     fin.close();
 
-    for (auto& [time, event_list] : event_map) {
-        std::cout << time << "\n";
-        for (auto& event : event_list) {
-            std::cout << "\t" << event.hart_id << " " << event.initiator_id << " " << event.index << " " << event.address << " " << event.old_state << " " << event.new_state << "\n";
-        }
-    }
-
     Gtk::Main kit;
     MieruCache::MainWindow main_window(800, 600, num_harts, num_entries, num_ways);
     kit.run(main_window);
