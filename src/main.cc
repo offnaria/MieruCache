@@ -23,10 +23,35 @@ class MainWindow : public Gtk::Window {
     Gtk::TreeModel::ColumnRecord record;
     Glib::RefPtr<Gtk::ListStore> list_store;
     Gtk::Frame caches_frame;
+    Gtk::Scale time_slider;
+    Gtk::ToolButton prev_button, next_button;
+    Gtk::SeparatorToolItem separator;
+    Gtk::Toolbar toolbar;
+    Gtk::Box box, toolbar_box;
 public:
-    MainWindow(int width, int height, int num_harts, int num_entries, int num_ways) {
+    MainWindow(int width, int height, int num_harts, int num_entries, int num_ways, int num_events) {
         set_default_size(width, height);
         set_title("MieruCache");
+
+        // Set up toolbar
+        prev_button.set_icon_name("go-previous");
+        toolbar.append(prev_button);
+        next_button.set_icon_name("go-next");
+        toolbar.append(next_button);
+        toolbar.append(separator);
+
+        // Set up time slider
+        time_slider.set_range(0, num_events - 1);
+        time_slider.set_value(0);
+        time_slider.set_digits(0);
+        time_slider.set_increments(1, 1);
+        time_slider.set_draw_value(true);
+        time_slider.set_value_pos(Gtk::POS_LEFT);
+        // TODO: Show the time in the slider instead of the index of the vector
+
+        toolbar_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+        toolbar_box.pack_start(toolbar, Gtk::PACK_SHRINK);
+        toolbar_box.pack_start(time_slider, Gtk::PACK_EXPAND_WIDGET);
 
         // Register columns
         record.add(index);
@@ -59,7 +84,15 @@ public:
         caches_frame.add(scrolled_window);
         caches_frame.set_label("Caches");
         set_border_width(8);
-        add(caches_frame);
+
+        // Put everything in a box
+        box.set_orientation(Gtk::ORIENTATION_VERTICAL);
+        // box.pack_start(toolbar, Gtk::PACK_SHRINK);
+        // box.pack_start(time_slider, Gtk::PACK_SHRINK);
+        box.pack_start(toolbar_box, Gtk::PACK_SHRINK);
+        box.pack_start(caches_frame, Gtk::PACK_EXPAND_WIDGET);
+        add(box);
+
         show_all_children();
     }
     virtual ~MainWindow() = default;
@@ -112,7 +145,7 @@ int main(int argc, char* argv[]) {
     fin.close();
 
     Gtk::Main kit;
-    MieruCache::MainWindow main_window(800, 600, num_harts, num_entries, num_ways);
+    MieruCache::MainWindow main_window(800, 600, num_harts, num_entries, num_ways, event_vector.size());
     kit.run(main_window);
     return 0;
 }
