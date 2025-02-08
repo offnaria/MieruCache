@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <map>
 #include <string>
 #include <list>
 #include <vector>
@@ -67,14 +66,15 @@ public:
 };
 }
 
-static std::map<unsigned long, std::list<MieruCache::CacheEvent>> event_map;
+static std::vector<std::pair<unsigned long, std::list<MieruCache::CacheEvent>>> event_vector;
 
-static int prepareEventMap(std::ifstream &fin, int count) {
+static int prepareEventVector(std::ifstream &fin, int count) {
     for (size_t i = 0; i < count; i++) {
         unsigned long time;
         fin >> time;
-        if (event_map.find(time) == event_map.end()) {
-            event_map[time] = std::list<MieruCache::CacheEvent>();
+        // Create a new item in the vector if the time is different
+        if (event_vector.empty() || event_vector.back().first != time) {
+            event_vector.emplace_back(time, std::list<MieruCache::CacheEvent>());
         }
 
         MieruCache::CacheEvent event;
@@ -84,7 +84,7 @@ static int prepareEventMap(std::ifstream &fin, int count) {
         fin >> event.address;
         fin >> event.old_state;
         fin >> event.new_state;
-        event_map[time].push_back(event);
+        event_vector.back().second.push_back(event);
     }
 
     return 0;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     num_entries = 1024; // TODO
     num_ways = 1;       // TODO
     std::cout << "Input lines: " << count << "\n";
-    prepareEventMap(fin, count);
+    prepareEventVector(fin, count);
     fin.close();
 
     Gtk::Main kit;
