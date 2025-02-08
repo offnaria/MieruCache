@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <list>
+#include <vector>
 #include <gtkmm.h>
 
 namespace MieruCache {
@@ -16,10 +17,44 @@ struct CacheEvent {
 };
 
 class MainWindow : public Gtk::Window {
+    Gtk::ScrolledWindow scrolled_window;
+    Gtk::TreeView tree_view;
+    Gtk::TreeModelColumn<int> index;
+    std::vector<Gtk::TreeModelColumn<std::string>> cache_lines;
+    Gtk::TreeModel::ColumnRecord record;
+    Glib::RefPtr<Gtk::ListStore> list_store;
 public:
-    MainWindow(int width, int height) {
+    MainWindow(int width, int height, int num_harts, int num_entries, int num_ways) {
         set_default_size(width, height);
         set_title("MieruCache");
+
+        // Register columns
+        record.add(index);
+        for (int i = 0; i < num_harts; i++) {
+            for (int j = 0; j < num_ways; j++) {
+                record.add(cache_lines.emplace_back());
+            }
+        }
+        // Create list store
+        list_store = Gtk::ListStore::create(record);
+        // Set list store
+        tree_view.set_model(list_store);
+        // Append columns to the tree view
+        tree_view.append_column("Index", index);
+        for (int i = 0; i < num_harts; i++) {
+            for (int j = 0; j < num_ways; j++) {
+                tree_view.append_column("Hart[" + std::to_string(i) + "], Way[" + std::to_string(j) + "]", cache_lines[i * num_ways + j]);
+            }
+        }
+        // Add rows
+        for (int i = 0; i < num_entries; i++) {
+            auto row = *(list_store->append());
+            row[index] = i;
+        }
+        // Add tree view to scrolled window
+        scrolled_window.add(tree_view);
+        add(scrolled_window);
+        show_all_children();
     }
     virtual ~MainWindow() = default;
 };
@@ -60,8 +95,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int count;
+    int count, num_harts, num_entries, num_ways;
     fin >> count;
+    num_harts = 4;      // TODO
+    num_entries = 1024; // TODO
+    num_ways = 1;       // TODO
     std::cout << "Input lines: " << count << "\n";
     prepareEventMap(fin, count);
     fin.close();
@@ -74,7 +112,7 @@ int main(int argc, char* argv[]) {
     }
 
     Gtk::Main kit;
-    MieruCache::MainWindow main_window(800, 600);
+    MieruCache::MainWindow main_window(800, 600, num_harts, num_entries, num_ways);
     kit.run(main_window);
     return 0;
 }
