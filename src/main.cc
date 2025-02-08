@@ -13,22 +13,11 @@ struct CacheEvent {
     unsigned char new_state;
 };
 
-int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file>" << "\n";
-        return 1;
-    }
+static std::map<unsigned long, std::list<CacheEvent>> event_map;
 
-    std::ifstream fin(argv[1]);
-    if (!fin) {
-        std::cerr << "Error: could not open file " << argv[1] << "\n";
-        return 1;
-    }
-
+int prepareEventMap(std::ifstream &fin) {
     int count;
     fin >> count;
-    std::cout << "Input lines: " << count << "\n";
-    std::map<unsigned long, std::list<CacheEvent>> event_map;
     for (size_t i = 0; i < count; i++) {
         unsigned long time;
         fin >> time;
@@ -46,6 +35,24 @@ int main(int argc, char* argv[]) {
         event_map[time].push_back(event);
     }
 
+    return count;
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <input_file>" << "\n";
+        return 1;
+    }
+
+    std::ifstream fin(argv[1]);
+    if (!fin) {
+        std::cerr << "Error: could not open file " << argv[1] << "\n";
+        return 1;
+    }
+
+    std::cout << "Input lines: " << prepareEventMap(fin) << "\n";
+    fin.close();
+
     for (auto& [time, event_list] : event_map) {
         std::cout << time << "\n";
         for (auto& event : event_list) {
@@ -53,6 +60,5 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    fin.close();
     return 0;
 }
