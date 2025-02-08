@@ -15,7 +15,7 @@ struct CacheEvent {
 
 static std::map<unsigned long, std::list<CacheEvent>> event_map;
 
-int prepareEventMap(std::ifstream &fin, int count) {
+static int prepareEventMap(std::ifstream &fin, int count) {
     for (size_t i = 0; i < count; i++) {
         unsigned long time;
         fin >> time;
