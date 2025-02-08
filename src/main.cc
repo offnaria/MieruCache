@@ -4,6 +4,7 @@
 #include <string>
 #include <list>
 
+namespace MieruCache {
 struct CacheEvent {
     unsigned int hart_id;
     unsigned int initiator_id;
@@ -12,18 +13,19 @@ struct CacheEvent {
     unsigned char old_state;
     unsigned char new_state;
 };
+}
 
-static std::map<unsigned long, std::list<CacheEvent>> event_map;
+static std::map<unsigned long, std::list<MieruCache::CacheEvent>> event_map;
 
 static int prepareEventMap(std::ifstream &fin, int count) {
     for (size_t i = 0; i < count; i++) {
         unsigned long time;
         fin >> time;
         if (event_map.find(time) == event_map.end()) {
-            event_map[time] = std::list<CacheEvent>();
+            event_map[time] = std::list<MieruCache::CacheEvent>();
         }
 
-        CacheEvent event;
+        MieruCache::CacheEvent event;
         fin >> event.hart_id;
         fin >> event.initiator_id;
         fin >> event.index;
