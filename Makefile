@@ -1,6 +1,7 @@
 # Variables
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17
+CXXFLAGS += $(shell pkg-config --cflags --libs gtkmm-3.0)
 SRC_DIR = src
 BUILD_DIR = build
 TARGET = $(BUILD_DIR)/mierucache
@@ -14,11 +15,11 @@ all: $(TARGET)
 
 # Link the target executable
 $(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) -o $@ $^ $(CXXFLAGS)
 
 # Compile source files to object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
 
 # Create build directory if it doesn't exist
 $(BUILD_DIR):

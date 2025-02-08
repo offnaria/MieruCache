@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <list>
+#include <gtkmm.h>
 
 namespace MieruCache {
 struct CacheEvent {
@@ -12,6 +13,15 @@ struct CacheEvent {
     std::string address;
     unsigned char old_state;
     unsigned char new_state;
+};
+
+class MainWindow : public Gtk::Window {
+public:
+    MainWindow(int width, int height) {
+        set_default_size(width, height);
+        set_title("MieruCache");
+    }
+    virtual ~MainWindow() = default;
 };
 }
 
@@ -63,5 +73,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    Gtk::Main kit(argc, argv);
+    MieruCache::MainWindow main_window(800, 600);
+    kit.run(main_window);
     return 0;
 }
