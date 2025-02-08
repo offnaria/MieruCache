@@ -15,9 +15,7 @@ struct CacheEvent {
 
 static std::map<unsigned long, std::list<CacheEvent>> event_map;
 
-int prepareEventMap(std::ifstream &fin) {
-    int count;
-    fin >> count;
+int prepareEventMap(std::ifstream &fin, int count) {
     for (size_t i = 0; i < count; i++) {
         unsigned long time;
         fin >> time;
@@ -35,7 +33,7 @@ int prepareEventMap(std::ifstream &fin) {
         event_map[time].push_back(event);
     }
 
-    return count;
+    return 0;
 }
 
 int main(int argc, char* argv[]) {
@@ -50,7 +48,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::cout << "Input lines: " << prepareEventMap(fin) << "\n";
+    int count;
+    fin >> count;
+    std::cout << "Input lines: " << count << "\n";
+    prepareEventMap(fin, count);
     fin.close();
 
     for (auto& [time, event_list] : event_map) {
