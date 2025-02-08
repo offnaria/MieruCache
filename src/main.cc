@@ -23,6 +23,7 @@ class MainWindow : public Gtk::Window {
     std::vector<Gtk::TreeModelColumn<std::string>> cache_lines;
     Gtk::TreeModel::ColumnRecord record;
     Glib::RefPtr<Gtk::ListStore> list_store;
+    Gtk::Frame caches_frame;
 public:
     MainWindow(int width, int height, int num_harts, int num_entries, int num_ways) {
         set_default_size(width, height);
@@ -53,7 +54,13 @@ public:
         }
         // Add tree view to scrolled window
         scrolled_window.add(tree_view);
-        add(scrolled_window);
+
+        // Add scrolled window to frame
+        scrolled_window.set_border_width(2);
+        caches_frame.add(scrolled_window);
+        caches_frame.set_label("Caches");
+        set_border_width(8);
+        add(caches_frame);
         show_all_children();
     }
     virtual ~MainWindow() = default;
