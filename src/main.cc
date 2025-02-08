@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    Gtk::Main kit(argc, argv);
+    Gtk::Main kit;
     MieruCache::MainWindow main_window(800, 600);
     kit.run(main_window);
     return 0;
