@@ -28,6 +28,7 @@ class MainWindow : public Gtk::Window {
     Gtk::Scale time_slider;
     Gtk::ToolButton prev_button, next_button;
     Gtk::SeparatorToolItem separator;
+    Gtk::Label time_label;
     Gtk::Toolbar toolbar;
     Gtk::Box box, toolbar_box;
     void onClickPrevButton() {
@@ -42,8 +43,10 @@ class MainWindow : public Gtk::Window {
     };
     void onChangeTimeSlider() { // TODO
         showCache(time_slider.get_value());
+        showTime(time_slider.get_value());
     };
     void showCache(int time_id);
+    void showTime(int time_id);
 public:
     MainWindow(int width, int height, int num_harts, int num_entries, int num_ways, int num_events) {
         this->num_harts = num_harts;
@@ -62,19 +65,22 @@ public:
         toolbar.append(next_button);
         toolbar.append(separator);
 
+        time_label.set_text("Time: 0");
+
         // Set up time slider
         time_slider.set_range(0, num_events);
         time_slider.set_value(0);
         time_slider.set_digits(0);
         time_slider.set_increments(1, 1);
-        time_slider.set_draw_value(true);
-        time_slider.set_value_pos(Gtk::POS_LEFT);
+        time_slider.set_draw_value(false);
+        time_slider.set_size_request(480, 0);
         time_slider.signal_value_changed().connect(sigc::mem_fun(*this, &MainWindow::onChangeTimeSlider));
         // TODO: Show the time in the slider instead of the index of the vector
 
         toolbar_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         toolbar_box.pack_start(toolbar, Gtk::PACK_SHRINK);
-        toolbar_box.pack_start(time_slider, Gtk::PACK_EXPAND_WIDGET);
+        toolbar_box.pack_start(time_slider, Gtk::PACK_SHRINK);
+        toolbar_box.pack_start(time_label, Gtk::PACK_SHRINK);
 
         // Register columns
         record.add(index);
@@ -140,6 +146,10 @@ void MieruCache::MainWindow::showCache(int time_id) {
         }
         row++;
     }
+}
+
+void MieruCache::MainWindow::showTime(int time_id) {
+    time_label.set_text("Time: " + std::to_string((time_id == 0) ? 0 : event_vector[time_id - 1].first));
 }
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
