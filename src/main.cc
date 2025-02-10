@@ -3,6 +3,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <memory>
 #include <gtkmm.h>
 
 namespace MieruCache {
@@ -117,7 +118,6 @@ public:
 
         // Put everything in a box
         box.set_orientation(Gtk::ORIENTATION_VERTICAL);
-        // box.pack_start(toolbar, Gtk::PACK_SHRINK);
         // box.pack_start(time_slider, Gtk::PACK_SHRINK);
         box.pack_start(toolbar_box, Gtk::PACK_SHRINK);
         box.pack_start(caches_frame, Gtk::PACK_EXPAND_WIDGET);
@@ -129,7 +129,7 @@ public:
 };
 }
 
-static std::vector<std::vector<std::pair<std::string, char>>> cache;
+static std::vector<std::vector<std::shared_ptr<std::pair<std::string, char>>>> cache;
 static std::vector<std::pair<unsigned long, std::list<MieruCache::CacheEvent>>> event_vector;
 
 void MieruCache::MainWindow::showCache(int time_id) {
@@ -140,7 +140,7 @@ void MieruCache::MainWindow::showCache(int time_id) {
         for (int i = 0; i < num_harts; i++) {
             for (int j = 0; j < num_ways; j++) {
                 auto cache_line = cache[time_id][num_harts * num_ways * idx + num_ways * i + j];
-                row[cache_lines[i * num_ways + j]] = (cache_line.second != 'I') ? cache_line.first + " (" + cache_line.second + ")" : "";
+                row[cache_lines[i * num_ways + j]] = (cache_line->second != 'I') ? cache_line->first + " (" + cache_line->second + ")" : "";
             }
         }
         row++;
@@ -152,7 +152,8 @@ void MieruCache::MainWindow::showTime(int time_id) {
 }
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
-    cache.assign(1, std::vector<std::pair<std::string, char>>(num_harts * num_entries * num_ways, std::make_pair("", 'I'))); // TODO: Initialize the cache with the correct values read from the file
+    cache.assign(1, std::vector<std::shared_ptr<std::pair<std::string, char>>>(
+        num_harts * num_entries * num_ways, std::make_shared<std::pair<std::string, char>>("", 'I'))); // TODO: Initialize the cache with the correct values read from the file
     return 0;
 }
 
@@ -191,7 +192,7 @@ static int generateCacheHistory(int num_harts, int num_ways) {
             unsigned int index = event.index;
             unsigned int way = 0; // TODO
 
-            cache[i][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_pair(event.address, event.new_state);
+            cache[i][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_shared<std::pair<std::string, char>>(event.address, event.new_state);
         }
     }
 
