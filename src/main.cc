@@ -3,6 +3,7 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <algorithm>
 #include <gtkmm.h>
 
 namespace MieruCache {
@@ -167,6 +168,26 @@ static int prepareEventVector(std::ifstream &fin, int count) {
     return 0;
 }
 
+static int generateCacheHistory(int num_harts, int num_ways) {
+    int num_events = event_vector.size();
+    // Resize the cache vector
+    cache.resize(num_events + 1); // +1 for the initial state
+    for (int i = 1; i <= num_events; i++) {
+        // Copy the previous state
+        cache[i] = cache[i - 1];
+        // Apply the events
+        for (auto &event : event_vector[i - 1].second) {
+            unsigned int hart_id = event.hart_id;
+            unsigned int index = event.index;
+            unsigned int way = 0; // TODO
+
+            cache[i][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_pair(event.address, event.new_state);
+        }
+    }
+
+    return 0;
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <input_file>" << "\n";
@@ -182,12 +203,13 @@ int main(int argc, char* argv[]) {
     int count, num_harts, num_entries, num_ways;
     fin >> count;
     num_harts = 4;      // TODO
-    num_entries = 1024; // TODO
+    num_entries = 2048; // TODO
     num_ways = 1;       // TODO
     std::cout << "Input lines: " << count << "\n";
     initializeCache(fin, num_harts, num_entries, num_ways);
     prepareEventVector(fin, count);
     fin.close();
+    generateCacheHistory(num_harts, num_ways);
 
     Gtk::Main kit;
     MieruCache::MainWindow main_window(800, 600, num_harts, num_entries, num_ways, event_vector.size());
