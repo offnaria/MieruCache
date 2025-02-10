@@ -12,8 +12,8 @@ struct CacheEvent {
     unsigned int initiator_id;
     unsigned int index;
     std::string address;
-    unsigned char old_state;
-    unsigned char new_state;
+    char old_state;
+    char new_state;
 };
 
 class MainWindow : public Gtk::Window {
@@ -124,7 +124,7 @@ public:
 };
 }
 
-static std::vector<std::vector<std::pair<std::string, unsigned char>>> cache;
+static std::vector<std::vector<std::pair<std::string, char>>> cache;
 static std::vector<std::pair<unsigned long, std::list<MieruCache::CacheEvent>>> event_vector;
 
 void MieruCache::MainWindow::showCache(int time_id) {
@@ -135,7 +135,7 @@ void MieruCache::MainWindow::showCache(int time_id) {
         for (int i = 0; i < num_harts; i++) {
             for (int j = 0; j < num_ways; j++) {
                 auto cache_line = cache[time_id][num_harts * num_ways * idx + num_ways * i + j];
-                row[cache_lines[i * num_ways + j]] = (cache_line.second != 'I') ? cache_line.first : "";
+                row[cache_lines[i * num_ways + j]] = (cache_line.second != 'I') ? cache_line.first + " (" + cache_line.second + ")" : "";
             }
         }
         row++;
@@ -143,7 +143,7 @@ void MieruCache::MainWindow::showCache(int time_id) {
 }
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
-    cache.assign(1, std::vector<std::pair<std::string, unsigned char>>(num_harts * num_entries * num_ways, std::make_pair("", 'I'))); // TODO: Initialize the cache with the correct values read from the file
+    cache.assign(1, std::vector<std::pair<std::string, char>>(num_harts * num_entries * num_ways, std::make_pair("", 'I'))); // TODO: Initialize the cache with the correct values read from the file
     return 0;
 }
 
