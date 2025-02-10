@@ -41,6 +41,7 @@ class MainWindow : public Gtk::Window {
     void onChangeTimeSlider() { // TODO
         std::cout << "Time slider value: " << time_slider.get_value() << "\n";
     };
+    void showCache(int time_id);
 public:
     MainWindow(int width, int height, int num_harts, int num_entries, int num_ways, int num_events) {
         set_default_size(width, height);
@@ -93,6 +94,8 @@ public:
             auto row = *(list_store->append());
             row[index] = i;
         }
+        // Show cache at time 0
+        showCache(0);
         // Add tree view to scrolled window
         scrolled_window.add(tree_view);
 
@@ -118,6 +121,22 @@ public:
 
 static std::vector<std::vector<std::vector<std::vector<std::pair<std::string, unsigned char>>>>> cache;
 static std::vector<std::pair<unsigned long, std::list<MieruCache::CacheEvent>>> event_vector;
+
+void MieruCache::MainWindow::showCache(int time_id) {
+    // Get the iterator to the first row
+    auto row = *(list_store->children().begin());
+    int num_harts = cache[0].size();
+    int num_ways = cache[0][0].size();
+    while (row) {
+        // Set the cache line values
+        for (int i = 0; i < num_harts; i++) {
+            for (int j = 0; j < num_ways; j++) {
+                row[cache_lines[i * num_ways + j]] = cache[time_id][i][j][row[index]].first;
+            }
+        }
+        row++;
+    }
+}
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
     cache.assign(1, std::vector<std::vector<std::vector<std::pair<std::string, unsigned char>>>>(num_harts, std::vector<std::vector<std::pair<std::string, unsigned char>>>(num_ways, std::vector<std::pair<std::string, unsigned char>>(num_entries, std::make_pair("NULL", 'I'))))); // TODO: Initialize the cache with the correct values read from the file
