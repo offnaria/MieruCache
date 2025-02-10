@@ -3,7 +3,6 @@
 #include <string>
 #include <list>
 #include <vector>
-#include <algorithm>
 #include <gtkmm.h>
 
 namespace MieruCache {
