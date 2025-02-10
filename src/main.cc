@@ -116,7 +116,13 @@ public:
 };
 }
 
+static std::vector<std::vector<std::vector<std::vector<std::pair<std::string, unsigned char>>>>> cache;
 static std::vector<std::pair<unsigned long, std::list<MieruCache::CacheEvent>>> event_vector;
+
+static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
+    cache.assign(1, std::vector<std::vector<std::vector<std::pair<std::string, unsigned char>>>>(num_harts, std::vector<std::vector<std::pair<std::string, unsigned char>>>(num_ways, std::vector<std::pair<std::string, unsigned char>>(num_entries, std::make_pair("NULL", 'I'))))); // TODO: Initialize the cache with the correct values read from the file
+    return 0;
+}
 
 static int prepareEventVector(std::ifstream &fin, int count) {
     for (size_t i = 0; i < count; i++) {
@@ -158,6 +164,7 @@ int main(int argc, char* argv[]) {
     num_entries = 1024; // TODO
     num_ways = 1;       // TODO
     std::cout << "Input lines: " << count << "\n";
+    initializeCache(fin, num_harts, num_entries, num_ways);
     prepareEventVector(fin, count);
     fin.close();
 
