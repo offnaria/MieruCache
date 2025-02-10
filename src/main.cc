@@ -16,6 +16,7 @@ struct CacheEvent {
 };
 
 class MainWindow : public Gtk::Window {
+    int num_harts, num_entries, num_ways;
     Gtk::ScrolledWindow scrolled_window;
     Gtk::TreeView tree_view;
     Gtk::TreeModelColumn<int> index;
@@ -44,6 +45,9 @@ class MainWindow : public Gtk::Window {
     void showCache(int time_id);
 public:
     MainWindow(int width, int height, int num_harts, int num_entries, int num_ways, int num_events) {
+        this->num_harts = num_harts;
+        this->num_entries = num_entries;
+        this->num_ways = num_ways;
         set_default_size(width, height);
         set_title("MieruCache");
         add_events(Gdk::BUTTON_PRESS_MASK);
@@ -119,19 +123,17 @@ public:
 };
 }
 
-static std::vector<std::vector<std::vector<std::vector<std::pair<std::string, unsigned char>>>>> cache;
+static std::vector<std::vector<std::pair<std::string, unsigned char>>> cache;
 static std::vector<std::pair<unsigned long, std::list<MieruCache::CacheEvent>>> event_vector;
 
 void MieruCache::MainWindow::showCache(int time_id) {
     // Get the iterator to the first row
     auto row = *(list_store->children().begin());
-    int num_harts = cache[0].size();
-    int num_ways = cache[0][0].size();
     while (row) {
-        // Set the cache line values
+        auto idx = row[index];
         for (int i = 0; i < num_harts; i++) {
             for (int j = 0; j < num_ways; j++) {
-                row[cache_lines[i * num_ways + j]] = cache[time_id][i][j][row[index]].first;
+                row[cache_lines[i * num_ways + j]] = cache[time_id][num_harts * num_ways * idx + num_ways * i + j].first;
             }
         }
         row++;
@@ -139,7 +141,7 @@ void MieruCache::MainWindow::showCache(int time_id) {
 }
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
-    cache.assign(1, std::vector<std::vector<std::vector<std::pair<std::string, unsigned char>>>>(num_harts, std::vector<std::vector<std::pair<std::string, unsigned char>>>(num_ways, std::vector<std::pair<std::string, unsigned char>>(num_entries, std::make_pair("NULL", 'I'))))); // TODO: Initialize the cache with the correct values read from the file
+    cache.assign(1, std::vector<std::pair<std::string, unsigned char>>(num_harts * num_entries * num_ways, std::make_pair("NULL", 'I'))); // TODO: Initialize the cache with the correct values read from the file
     return 0;
 }
 
