@@ -38,6 +38,9 @@ class MainWindow : public Gtk::Window {
             time_slider.set_value(time_slider.get_value() + 1);
         }
     };
+    void onChangeTimeSlider() { // TODO
+        std::cout << "Time slider value: " << time_slider.get_value() << "\n";
+    };
 public:
     MainWindow(int width, int height, int num_harts, int num_entries, int num_ways, int num_events) {
         set_default_size(width, height);
@@ -60,6 +63,7 @@ public:
         time_slider.set_increments(1, 1);
         time_slider.set_draw_value(true);
         time_slider.set_value_pos(Gtk::POS_LEFT);
+        time_slider.signal_value_changed().connect(sigc::mem_fun(*this, &MainWindow::onChangeTimeSlider));
         // TODO: Show the time in the slider instead of the index of the vector
 
         toolbar_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
