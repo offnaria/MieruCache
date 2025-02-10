@@ -147,8 +147,8 @@ static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, i
     return 0;
 }
 
-static int prepareEventVector(std::ifstream &fin, int count) {
-    for (size_t i = 0; i < count; i++) {
+static int prepareEventVector(std::ifstream &fin) {
+    while (fin) {
         unsigned long time;
         fin >> time;
         // Create a new item in the vector if the time is different
@@ -202,13 +202,11 @@ int main(int argc, char* argv[]) {
     }
 
     int count, num_harts, num_entries, num_ways;
-    fin >> count;
     fin >> num_harts;
     fin >> num_entries;
     fin >> num_ways;
-    std::cout << "Input lines: " << count << "\n";
     initializeCache(fin, num_harts, num_entries, num_ways);
-    prepareEventVector(fin, count);
+    prepareEventVector(fin);
     fin.close();
     generateCacheHistory(num_harts, num_ways);
 
