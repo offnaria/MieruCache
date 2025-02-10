@@ -41,7 +41,7 @@ class MainWindow : public Gtk::Window {
         }
     };
     void onChangeTimeSlider() { // TODO
-        std::cout << "Time slider value: " << time_slider.get_value() << "\n";
+        showCache(time_slider.get_value());
     };
     void showCache(int time_id);
 public:
@@ -63,7 +63,7 @@ public:
         toolbar.append(separator);
 
         // Set up time slider
-        time_slider.set_range(0, num_events - 1);
+        time_slider.set_range(0, num_events);
         time_slider.set_value(0);
         time_slider.set_digits(0);
         time_slider.set_increments(1, 1);
