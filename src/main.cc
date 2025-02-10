@@ -28,15 +28,28 @@ class MainWindow : public Gtk::Window {
     Gtk::SeparatorToolItem separator;
     Gtk::Toolbar toolbar;
     Gtk::Box box, toolbar_box;
+    void onClickPrevButton() {
+        if (time_slider.get_value() > 0) {
+            time_slider.set_value(time_slider.get_value() - 1);
+        }
+    };
+    void onClickNextButton() {
+        if (time_slider.get_value() < time_slider.get_adjustment()->get_upper()) {
+            time_slider.set_value(time_slider.get_value() + 1);
+        }
+    };
 public:
     MainWindow(int width, int height, int num_harts, int num_entries, int num_ways, int num_events) {
         set_default_size(width, height);
         set_title("MieruCache");
+        add_events(Gdk::BUTTON_PRESS_MASK);
 
         // Set up toolbar
         prev_button.set_icon_name("go-previous");
+        prev_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onClickPrevButton));
         toolbar.append(prev_button);
         next_button.set_icon_name("go-next");
+        next_button.signal_clicked().connect(sigc::mem_fun(*this, &MainWindow::onClickNextButton));
         toolbar.append(next_button);
         toolbar.append(separator);
 
