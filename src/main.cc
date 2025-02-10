@@ -203,9 +203,9 @@ int main(int argc, char* argv[]) {
 
     int count, num_harts, num_entries, num_ways;
     fin >> count;
-    num_harts = 4;      // TODO
-    num_entries = 2048; // TODO
-    num_ways = 1;       // TODO
+    fin >> num_harts;
+    fin >> num_entries;
+    fin >> num_ways;
     std::cout << "Input lines: " << count << "\n";
     initializeCache(fin, num_harts, num_entries, num_ways);
     prepareEventVector(fin, count);
