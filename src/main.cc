@@ -7,6 +7,8 @@
 #include <gtkmm.h>
 
 namespace MieruCache {
+const std::string initial_message = "Initial state";
+
 struct CacheEvent {
     unsigned int hart_id;
     unsigned int initiator_id;
@@ -31,6 +33,8 @@ class MainWindow : public Gtk::Window {
     Gtk::Label time_label;
     Gtk::Toolbar toolbar;
     Gtk::Box box, toolbar_box;
+    Gtk::Frame event_frame;
+    Gtk::Label event_label;
     void onClickPrevButton() {
         if (time_slider.get_value() > 0) {
             time_slider.set_value(time_slider.get_value() - 1);
@@ -42,11 +46,18 @@ class MainWindow : public Gtk::Window {
         }
     };
     void onChangeTimeSlider() { // TODO
-        showCache(time_slider.get_value());
-        showTime(time_slider.get_value());
+        auto time_id = time_slider.get_value();
+        showCache(time_id);
+        showTime(time_id);
+        if (time_id > 0) {
+            showEvent(time_id - 1);
+        } else {
+            event_label.set_text(initial_message);
+        }
     };
     void showCache(int time_id);
     void showTime(int time_id);
+    void showEvent(int time_id);
 public:
     MainWindow(int width, int height, int num_harts, int num_entries, int num_ways, int num_events) {
         this->num_harts = num_harts;
@@ -116,11 +127,20 @@ public:
         caches_frame.set_label("Caches");
         set_border_width(8);
 
+        // Prepare event label
+        event_label.set_text(initial_message);
+
+        // Prepare event frame
+        event_frame.set_label("Events");
+        event_frame.add(event_label);
+        set_border_width(8);
+
         // Put everything in a box
         box.set_orientation(Gtk::ORIENTATION_VERTICAL);
         // box.pack_start(time_slider, Gtk::PACK_SHRINK);
         box.pack_start(toolbar_box, Gtk::PACK_SHRINK);
         box.pack_start(caches_frame, Gtk::PACK_EXPAND_WIDGET);
+        box.pack_start(event_frame, Gtk::PACK_SHRINK);
         add(box);
 
         show_all_children();
@@ -149,6 +169,15 @@ void MieruCache::MainWindow::showCache(int time_id) {
 
 void MieruCache::MainWindow::showTime(int time_id) {
     time_label.set_text("Time: " + std::to_string((time_id == 0) ? 0 : event_vector[time_id - 1].first));
+}
+
+void MieruCache::MainWindow::showEvent(int time_id) {
+    event_label.set_text("Event: Hart[" + std::to_string(event_vector[time_id].second.front().hart_id) + "], " +
+        "Initiator[" + std::to_string(event_vector[time_id].second.front().initiator_id) + "], " +
+        "Index[" + std::to_string(event_vector[time_id].second.front().index) + "], " +
+        "Address[" + event_vector[time_id].second.front().address + "], " +
+        "Old State[" + event_vector[time_id].second.front().old_state + "], " +
+        "New State[" + event_vector[time_id].second.front().new_state + "]");
 }
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
