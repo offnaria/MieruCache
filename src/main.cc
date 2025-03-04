@@ -86,7 +86,6 @@ public:
         time_slider.set_draw_value(false);
         time_slider.set_size_request(480, 0);
         time_slider.signal_value_changed().connect(sigc::mem_fun(*this, &MainWindow::onChangeTimeSlider));
-        // TODO: Show the time in the slider instead of the index of the vector
 
         toolbar_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
         toolbar_box.pack_start(toolbar, Gtk::PACK_SHRINK);
