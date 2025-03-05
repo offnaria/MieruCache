@@ -17,7 +17,10 @@ The expected result is as follows:
 ![Example screenshot](doc/img/exampe_screenshot.png)
 
 You can see cache state for each entry and occupying address, those are for the time you selected with the arrows or the bar on the top of the window.
-The event that occurred at the shown time is also displayed at the bottom of the window.
+The event that occurred at the shown time is also displayed at the bottom of the window like:
+```
+Event: Hart[3], Initiator[3], Address[8002af38], Old State[M], New State[M]
+```
 
 ### Format
 
@@ -44,4 +47,6 @@ Please visit the [`example`](example) directory.
 - [X] Implement GUI.
 - [ ] Improve GUI.
 	- [x] Highlight the changing cache lines.
+	- [ ] Show the cache occupancy.
+	- [ ] Detect the illegal state.
 - [ ] Enable multiple ways for set-associative and full-associative.
