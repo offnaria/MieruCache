@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include <memory>
+#include <sstream>
 #include <gtkmm.h>
 
 namespace MieruCache {
@@ -14,7 +15,7 @@ struct CacheEvent {
     unsigned int hart_id;
     unsigned int initiator_id;
     unsigned int index;
-    std::string address;
+    unsigned long address;
     char old_state;
     char new_state;
 };
@@ -149,7 +150,7 @@ public:
 };
 }
 
-static std::vector<std::vector<std::shared_ptr<std::pair<std::string, char>>>> cache;
+static std::vector<std::vector<std::shared_ptr<std::pair<unsigned long, char>>>> cache;
 static std::vector<std::pair<unsigned long, std::list<MieruCache::CacheEvent>>> event_vector;
 
 void MieruCache::MainWindow::showCache(int time_id) {
@@ -159,8 +160,14 @@ void MieruCache::MainWindow::showCache(int time_id) {
         auto idx = row[index];
         for (int i = 0; i < num_harts; i++) {
             for (int j = 0; j < num_ways; j++) {
+                std::stringstream ss;
                 auto cache_line = cache[time_id][num_harts * num_ways * idx + num_ways * i + j];
-                row[cache_lines[i * num_ways + j]] = (cache_line->second != 'I') ? cache_line->first + " (" + cache_line->second + ")" : "";
+                if (cache_line->second == 'I') {
+                    ss << "";
+                } else {
+                    ss << std::hex << cache_line->first << " (" << cache_line->second << ")";
+                }
+                row[cache_lines[i * num_ways + j]] = ss.str();
             }
         }
         row++;
@@ -172,17 +179,19 @@ void MieruCache::MainWindow::showTime(int time_id) {
 }
 
 void MieruCache::MainWindow::showEvent(int time_id) {
-    event_label.set_text("Event: Hart[" + std::to_string(event_vector[time_id].second.front().hart_id) + "], " +
-        "Initiator[" + std::to_string(event_vector[time_id].second.front().initiator_id) + "], " +
-        "Index[" + std::to_string(event_vector[time_id].second.front().index) + "], " +
-        "Address[" + event_vector[time_id].second.front().address + "], " +
-        "Old State[" + event_vector[time_id].second.front().old_state + "], " +
-        "New State[" + event_vector[time_id].second.front().new_state + "]");
+    std::stringstream ss;
+    ss << "Event: Hart[" << event_vector[time_id].second.front().hart_id << "], " <<
+        "Initiator[" << event_vector[time_id].second.front().initiator_id << "], " <<
+        "Index[" << event_vector[time_id].second.front().index << "], " <<
+        "Address[" << std::hex << event_vector[time_id].second.front().address << "], " <<
+        "Old State[" << event_vector[time_id].second.front().old_state << "], " <<
+        "New State[" << event_vector[time_id].second.front().new_state << "]";
+    event_label.set_text(ss.str());
 }
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
     std::cout << "Initializing cache...";
-    cache.emplace_back(std::vector<std::shared_ptr<std::pair<std::string, char>>>(num_harts * num_entries * num_ways));
+    cache.emplace_back(std::vector<std::shared_ptr<std::pair<unsigned long, char>>>(num_harts * num_entries * num_ways));
     for (int i = 0; i < num_harts; i++) {
         int hart_id;
         fin >> hart_id;
@@ -192,8 +201,8 @@ static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, i
                 char state;
                 fin >> address;
                 fin >> state;
-                cache[0][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_shared<std::pair<std::string, char>>(
-                    (state == 'I') ? "" : address, state);
+                cache[0][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_shared<std::pair<unsigned long, char>>(
+                    std::stoul(address, nullptr, 16), state);
             }
         }
     }
@@ -203,6 +212,7 @@ static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, i
 }
 
 static int prepareEventVector(std::ifstream &fin) {
+    std::cout << "Preparing event vector...";
     while (fin) {
         unsigned long time;
         fin >> time;
@@ -212,14 +222,21 @@ static int prepareEventVector(std::ifstream &fin) {
         }
 
         MieruCache::CacheEvent event;
+        std::string address;
         fin >> event.hart_id;
         fin >> event.initiator_id;
         fin >> event.index;
-        fin >> event.address;
+        fin >> address;
+        try {
+            event.address = std::stoul(address, nullptr, 16);
+        } catch (std::invalid_argument &e) {
+            break;
+        }
         fin >> event.old_state;
         fin >> event.new_state;
         event_vector.back().second.push_back(event);
     }
+    std::cout << "done\n";
 
     return 0;
 }
@@ -237,7 +254,7 @@ static int generateCacheHistory(int num_harts, int num_ways) {
             unsigned int index = event.index;
             unsigned int way = 0; // TODO
 
-            cache[i][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_shared<std::pair<std::string, char>>(event.address, event.new_state);
+            cache[i][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_shared<std::pair<unsigned long, char>>(event.address, event.new_state);
         }
     }
 
