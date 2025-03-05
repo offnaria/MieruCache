@@ -9,28 +9,39 @@ Then, type the following commands:
 
 ```
 make
-./build/mierucache example/example.txt
+./build/mierucache example/example_delayed.txt
 ```
 
 The expected result is as follows:
 
 ![Example screenshot](doc/img/exampe_screenshot.png)
 
+You can see cache state for each entry and occupying address, those are for the time you selected with the arrows or the bar on the top of the window.
+The event that occurred at the shown time is also displayed at the bottom of the window.
+
 ### Format
 
 Currently, MieruCache accepts text files with the following format:
 
-```
-num_harts num_entries num_ways
-time      hart_id     initiator_id    index    address    old_state    new_state
+```c++
+// configurations
+num_harts num_entries num_ways initial_time
+// initial cache state for each cores (harts)
+hart_id
+initial_address[hart_id][0]    initial_state[hart_id][0]
+initial_address[hart_id][1]    initial_state[hart_id][1]
+...
+// events
+time    target_hart_id    initiator_hart_id    index    address    old_state    new_state
 ...
 ```
 
-Please visit `example` directory.
+Please visit the [`example`](example) directory.
 
 ## TODO
 
 - [X] Implement a simple parser.
 - [X] Implement GUI.
 - [ ] Improve GUI.
-	- [ ] Highlight the changing cache lines.
+	- [x] Highlight the changing cache lines.
+- [ ] Enable multiple ways for set-associative and full-associative.
