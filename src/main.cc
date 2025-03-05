@@ -180,8 +180,24 @@ void MieruCache::MainWindow::showEvent(int time_id) {
 }
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
-    cache.assign(1, std::vector<std::shared_ptr<std::pair<std::string, char>>>(
-        num_harts * num_entries * num_ways, std::make_shared<std::pair<std::string, char>>("", 'I'))); // TODO: Initialize the cache with the correct values read from the file
+    std::cout << "Initializing cache...";
+    cache.emplace_back(std::vector<std::shared_ptr<std::pair<std::string, char>>>(num_harts * num_entries * num_ways));
+    for (int i = 0; i < num_harts; i++) {
+        int hart_id;
+        fin >> hart_id;
+        for (int way = 0; way < num_ways; way++) {
+            for (int index = 0; index < num_entries; index++) {
+                std::string address;
+                char state;
+                fin >> address;
+                fin >> state;
+                cache[0][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_shared<std::pair<std::string, char>>(
+                    (state == 'I') ? "" : address, state);
+            }
+        }
+    }
+    std::cout << "done\n";
+
     return 0;
 }
 
