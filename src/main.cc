@@ -8,6 +8,7 @@
 
 namespace MieruCache {
 const std::string initial_message = "Initial state";
+unsigned long initial_time;
 
 struct CacheEvent {
     unsigned int hart_id;
@@ -76,7 +77,7 @@ public:
         toolbar.append(next_button);
         toolbar.append(separator);
 
-        time_label.set_text("Time: 0");
+        time_label.set_text("Time: " + std::to_string(initial_time));
 
         // Set up time slider
         time_slider.set_range(0, num_events);
@@ -167,7 +168,7 @@ void MieruCache::MainWindow::showCache(int time_id) {
 }
 
 void MieruCache::MainWindow::showTime(int time_id) {
-    time_label.set_text("Time: " + std::to_string((time_id == 0) ? 0 : event_vector[time_id - 1].first));
+    time_label.set_text("Time: " + std::to_string((time_id == 0) ? initial_time : event_vector[time_id - 1].first));
 }
 
 void MieruCache::MainWindow::showEvent(int time_id) {
@@ -259,6 +260,7 @@ int main(int argc, char* argv[]) {
     fin >> num_harts;
     fin >> num_entries;
     fin >> num_ways;
+    fin >> MieruCache::initial_time;
     initializeCache(fin, num_harts, num_entries, num_ways);
     prepareEventVector(fin);
     fin.close();
