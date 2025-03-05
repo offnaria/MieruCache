@@ -62,6 +62,7 @@ class MainWindow : public Gtk::Window {
     void showEvent(int time_id);
 public:
     MainWindow(int width, int height, int num_harts, int num_entries, int num_ways, int num_events) {
+        std::cout << "Creating main window..." << std::flush;
         this->num_harts = num_harts;
         this->num_entries = num_entries;
         this->num_ways = num_ways;
@@ -145,6 +146,7 @@ public:
         add(box);
 
         show_all_children();
+        std::cout << "done\n";
     }
     virtual ~MainWindow() = default;
 };
@@ -190,7 +192,7 @@ void MieruCache::MainWindow::showEvent(int time_id) {
 }
 
 static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, int num_ways) {
-    std::cout << "Initializing cache...";
+    std::cout << "Initializing cache..." << std::flush;
     cache.emplace_back(std::vector<std::shared_ptr<std::pair<unsigned long, char>>>(num_harts * num_entries * num_ways));
     for (int i = 0; i < num_harts; i++) {
         int hart_id;
@@ -212,7 +214,7 @@ static int initializeCache(std::ifstream &fin, int num_harts, int num_entries, i
 }
 
 static int prepareEventVector(std::ifstream &fin) {
-    std::cout << "Preparing event vector...";
+    std::cout << "Preparing event vector..." << std::flush;
     while (fin) {
         unsigned long time;
         fin >> time;
@@ -242,6 +244,7 @@ static int prepareEventVector(std::ifstream &fin) {
 }
 
 static int generateCacheHistory(int num_harts, int num_ways) {
+    std::cout << "Generating cache history..." << std::flush;
     int num_events = event_vector.size();
     // Resize the cache vector
     cache.resize(num_events + 1); // +1 for the initial state
@@ -257,6 +260,7 @@ static int generateCacheHistory(int num_harts, int num_ways) {
             cache[i][num_harts * num_ways * index + num_ways * hart_id + way] = std::make_shared<std::pair<unsigned long, char>>(event.address, event.new_state);
         }
     }
+    std::cout << "done\n";
 
     return 0;
 }
@@ -280,7 +284,9 @@ int main(int argc, char* argv[]) {
     fin >> MieruCache::initial_time;
     initializeCache(fin, num_harts, num_entries, num_ways);
     prepareEventVector(fin);
+    std::cout << "Closing file " << argv[1] << "..." << std::flush;
     fin.close();
+    std::cout << "done\n";
     generateCacheHistory(num_harts, num_ways);
 
     Gtk::Main kit;
