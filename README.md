@@ -48,5 +48,5 @@ Please visit the [`example`](example) directory.
 - [ ] Improve GUI.
 	- [x] Highlight the changing cache lines.
 	- [ ] Show the cache occupancy.
-	- [ ] Detect the illegal state.
 - [ ] Enable multiple ways for set-associative and full-associative.
+- [ ] Detect the illegal state.
